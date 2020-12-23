@@ -68,17 +68,17 @@ public class Database {
         return (studentUsers.putIfAbsent(name, new Student(name, pass)) == null);
     }
 
-    public boolean loginAdmin(String name) {
+    public boolean loginAdmin(String name, String pass) {
         Admin temp = adminUsers.get(name);
-        if (temp == null || temp.isLoggedIn())
+        if (temp == null || !pass.equals(temp.getPsw()) || temp.isLoggedIn())
             return false;
         temp.logInOrOut();
         return true;
     }
 
-    public boolean loginStudent(String name) {
+    public boolean loginStudent(String name, String pass) {
         Student temp = studentUsers.get(name);
-        if (temp == null || temp.isLoggedIn())
+        if (temp == null || !pass.equals(temp.getPsw()) || temp.isLoggedIn())
             return false;
         temp.logInOrOut();
         return true;

@@ -18,4 +18,8 @@ public class Admin {
     public void logInOrOut() {
         loggedIn = !loggedIn;
     }
+
+    public String getPsw() {
+        return psw;
+    }
 }

@@ -24,4 +24,8 @@ public class Student {
     public boolean[] getCourses() {
         return courses;
     }
+
+    public String getPsw() {
+        return psw;
+    }
 }
