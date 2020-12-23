@@ -1,0 +1,27 @@
+package bgu.spl.net.impl.BGRS;
+
+import bgu.spl.net.Database;
+
+public class Student {
+    private final String name;
+    private final String psw;
+    private boolean loggedIn = false;
+    private boolean[] courses;
+    public Student(String name,String psw){
+        this.name = name;
+        this.psw = psw;
+        courses = new boolean[Database.getInstance().getNumberOfCourses()];
+    }
+
+    public boolean isLoggedIn() {
+        return loggedIn;
+    }
+
+    public void logInOrOut() {
+        loggedIn = !loggedIn;
+    }
+
+    public boolean[] getCourses() {
+        return courses;
+    }
+}

@@ -44,8 +44,7 @@ public abstract class BaseServer<T> implements Server<T> {
 
                 execute(handler);
             }
-        } catch (IOException ex) {
-        }
+        } catch (IOException ignored) {}
 
         System.out.println("server closed!!!");
     }
