@@ -7,7 +7,6 @@ import bgu.spl.net.impl.BGRS.Student;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Arrays;
 
 /**
  * Passive object representing the Database where all courses and users are stored.
@@ -115,26 +114,68 @@ public class Database {
                 return false;
         }
         registred[locationOfCourse] = true;
+        courses[locationOfCourse].addStudent(name);
         return true;
     }
 
-    public List<Integer> kdamCheck(int num) {
-        List<Integer> ans = new LinkedList<>();
-        boolean[] kdams = findCourse(num).getKdamCourses();
-        for (int i = kdams.length - 1; i >= 0; i--)
-            if (kdams[i])
-                ans.add(courses[i].getNum());
-        return ans;
+    //you must be logged in to check this?
+    public List<Integer> kdamCheck(Course course, Student student) {
+        if (student.isLoggedIn()) {
+            List<Integer> ans = new LinkedList<>();
+            boolean[] kdams = course.getKdamCourses();
+            for (int i = kdams.length - 1; i >= 0; i--)
+                if (kdams[i])
+                    ans.add(courses[i].getNum());
+            return ans;
+        }
+        return null;
     }
 
-    public void courseStat(int course){
+    // print or return to client?
+    public void courseStat(int course) {
         Course curr = findCourse(course);
         System.out.println("Course: " + "(" + course + ")" + curr.getName());
-        System.out.println("Seats Available: " + curr.getSeatsAvailable() + "/" + curr.getMaxSeats());
+        System.out.println("Seats Available: " + (curr.getMaxSeats() - curr.getSeatsTaken().intValue()) + "/" + curr.getMaxSeats());
         System.out.println("Students Registered: " + curr.getRegisteredStudents());
     }
-    public void studentStat (Student student){
+
+    // print or return to client?
+    public void studentStat(Student student) {
+        List<Integer> ans = new LinkedList<>();
+        for (int i = courses.length - 1; i >= 0; i--) {
+            if (student.getCourses()[i])
+                ans.add(courses[i].getNum());
+        }
         System.out.println("Student: " + student.getName());
-        System.out.println("Courses: ");
+        System.out.println("Courses: " + ans);
+    }
+
+    public String isRegistered(String name, Course course) {
+        if (course.isRegistered(name) != -1)
+            return "REGISTERED";
+        return "UNREGISTERED";
+    }
+
+    public boolean unregister(Course course, Student student) {
+        int index = course.isRegistered(student.getName());
+        if (index == -1 || !student.isLoggedIn())
+            return false;
+        course.removeStudent(index);
+        for (int i = 0; i < courses.length; i++) {
+            if (courses[i] == course) {
+                index = i;
+                break;
+            }
+        }
+        student.getCourses()[index] = false;
+        return true;
+    }
+    public List<Integer> myCourses(Student student){
+        List<Integer> ans = new LinkedList<>();
+        boolean[] toAns = student.getCourses();
+        for (int i = courses.length - 1; i >= 0; i--)
+            if (toAns[i])
+                ans.add(courses[i].getNum());
+        return ans;
     }
 }
