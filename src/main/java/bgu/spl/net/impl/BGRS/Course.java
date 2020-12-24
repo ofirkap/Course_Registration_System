@@ -4,11 +4,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Course {
 
-    private int num;
-    private String name;
-    private int maxSeats;
+    private final int num;
+    private final String name;
+    private final int maxSeats;
     private AtomicInteger seatsAvailable = new AtomicInteger(0);
-    private boolean[] kdamCourses;
+    private final boolean[] kdamCourses;
     private String[] registeredStudents;
 
     public Course(int num, String name, int maxSeats, boolean[] kdamCourses) {

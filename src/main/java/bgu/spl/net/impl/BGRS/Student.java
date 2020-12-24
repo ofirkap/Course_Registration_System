@@ -28,4 +28,8 @@ public class Student {
     public String getPsw() {
         return psw;
     }
+
+    public String getName() {
+        return name;
+    }
 }

@@ -126,4 +126,15 @@ public class Database {
                 ans.add(courses[i].getNum());
         return ans;
     }
+
+    public void courseStat(int course){
+        Course curr = findCourse(course);
+        System.out.println("Course: " + "(" + course + ")" + curr.getName());
+        System.out.println("Seats Available: " + curr.getSeatsAvailable() + "/" + curr.getMaxSeats());
+        System.out.println("Students Registered: " + curr.getRegisteredStudents());
+    }
+    public void studentStat (Student student){
+        System.out.println("Student: " + student.getName());
+        System.out.println("Courses: ");
+    }
 }
