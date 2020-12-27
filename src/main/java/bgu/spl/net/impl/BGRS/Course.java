@@ -9,10 +9,10 @@ public class Course {
     private final String name;
     private final int maxSeats;
     private AtomicInteger seatsTaken = new AtomicInteger(0);
-    private final boolean[] kdamCourses;
+    private final int[] kdamCourses;
     private String[] registeredStudents;
 
-    public Course(int num, String name, int maxSeats, boolean[] kdamCourses) {
+    public Course(int num, String name, int[] kdamCourses, int maxSeats) {
         this.num = num;
         this.name = name;
         this.maxSeats = maxSeats;
@@ -32,19 +32,21 @@ public class Course {
         return maxSeats;
     }
 
-    public AtomicInteger getSeatsTaken() {
+    public synchronized AtomicInteger getSeatsTaken() {
         return seatsTaken;
     }
 
-    public boolean[] getKdamCourses() {
+    public int[] getKdamCourses() {
         return kdamCourses;
     }
 
-    public String[] getRegisteredStudents() {
+    public synchronized String[] getRegisteredStudents() {
         return registeredStudents;
     }
 
-    public synchronized void addStudent(String name) {
+    public synchronized boolean addStudent(String name) {
+        if(seatsTaken.intValue() == maxSeats)
+            return false;
         for (int i = 0; i < seatsTaken.intValue(); i++) {
             if (name.compareTo(registeredStudents[i]) > 0) {
                 for (int j = seatsTaken.intValue(); j > i; j--) {
@@ -54,6 +56,8 @@ public class Course {
                 break;
             }
         }
+        seatsTaken.incrementAndGet();
+        return true;
     }
 
     public synchronized void removeStudent(int index){
@@ -63,7 +67,7 @@ public class Course {
         registeredStudents[seatsTaken.intValue()-1] = null;
         seatsTaken.decrementAndGet();
     }
-    public int isRegistered(String name){
+    public synchronized int isRegistered(String name){
         return Arrays.binarySearch(registeredStudents,name);
     }
 }
