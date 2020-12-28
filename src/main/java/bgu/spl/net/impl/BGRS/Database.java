@@ -1,8 +1,5 @@
-package bgu.spl.net;
+package bgu.spl.net.impl.BGRS;
 
-import bgu.spl.net.impl.BGRS.Admin;
-import bgu.spl.net.impl.BGRS.Course;
-import bgu.spl.net.impl.BGRS.Student;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -114,26 +111,19 @@ public class Database {
      * @param pass the password to login with
      * @return true if login successful, false otherwise
      */
-    public boolean loginAdmin(String name, String pass) {
-        Admin temp = adminUsers.get(name);
-        if (temp == null || !pass.equals(temp.getPsw()) || temp.isLoggedIn())
-            return false;
-        temp.logInOrOut();
-        return true;
-    }
-
-    /**
-     * login if provided a correct password, registered and not logged in already
-     *
-     * @param name the name of the user preforming the action
-     * @param pass the password to login with
-     * @return true if login successful, false otherwise
-     */
-    public boolean loginStudent(String name, String pass) {
-        Student temp = studentUsers.get(name);
-        if (temp == null || !pass.equals(temp.getPsw()) || temp.isLoggedIn())
-            return false;
-        temp.logInOrOut();
+    public boolean login(String name, String pass) {
+        Admin tempA = adminUsers.get(name);
+        //if no admin registered under that name, try a student
+        if (tempA == null) {
+            Student tempS = studentUsers.get(name);
+            if (tempS == null || !pass.equals(tempS.getPsw()) || tempS.isLoggedIn())
+                return false;
+            tempS.logInOrOut();
+        }else {
+            if (!pass.equals(tempA.getPsw()) || tempA.isLoggedIn())
+                return false;
+            tempA.logInOrOut();
+        }
         return true;
     }
 
@@ -222,28 +212,26 @@ public class Database {
      * @return the array of kdams required for course 'num'
      */
     //you must be logged in to check this?
-    public int[] kdamCheck(int num) {
-        return findCourse(num).getKdamCourses();
+    public String kdamCheck(int num) {
+        return "\n" + findCourse(num).getKdamCourses().toString();
     }
 
     /**
      * @param num the number of course to check
      * @print the information of the course 'num'
      */
-    // print or return to client?
-    public void courseStat(int num) {
+    public String courseStat(int num) {
         Course curr = findCourse(num);
-        System.out.println("Course: " + "(" + num + ")" + curr.getName());
-        System.out.println("Seats Available: " + (curr.getMaxSeats() - curr.getSeatsTaken().intValue()) + "/" + curr.getMaxSeats());
-        System.out.println("Students Registered: " + curr.getRegisteredStudents());
+        return ("\n" + "Course: " + "(" + num + ")" + curr.getName() +
+                "\n" + "Seats Available: " + (curr.getMaxSeats() - curr.getSeatsTaken().intValue()) + "/" + curr.getMaxSeats() +
+                "\n" + "Students Registered: " + curr.getRegisteredStudents());
     }
 
     /**
      * @param name the name of the student to check
      * @print the information of the student 'name'
      */
-    // print or return to client?
-    public void studentStat(String name) {
+    public String studentStat(String name) {
         Student student = studentUsers.get(name);
         List<Integer> ans = new LinkedList<>();
         //synchronized prevents the student 'name' from registering to courses while printing his stats
@@ -253,8 +241,8 @@ public class Database {
                     ans.add(courses[i].getNum());
             }
         }
-        System.out.println("Student: " + student.getName());
-        System.out.println("Courses: " + ans);
+        return ("\n" + "Student: " + student.getName() +
+                "\n" + "Courses: " + ans);
     }
 
     /**
@@ -264,8 +252,8 @@ public class Database {
      */
     public String isRegistered(String name, int num) {
         if (findCourse(num).isRegistered(name) != -1)
-            return "REGISTERED";
-        return "UNREGISTERED";
+            return "\n" + "REGISTERED";
+        return "\n" + "UNREGISTERED";
     }
 
     /**
@@ -296,12 +284,12 @@ public class Database {
      * @param name the name of the user preforming the action
      * @return a list representing the courses that student 'name' is registered to
      */
-    public List<Integer> myCourses(String name) {
+    public String myCourses(String name) {
         List<Integer> ans = new LinkedList<>();
         boolean[] toAns = studentUsers.get(name).getCourses();
         for (int i = courses.length - 1; i >= 0; i--)
             if (toAns[i])
                 ans.add(courses[i].getNum());
-        return ans;
+        return "\n" + ans.toString();
     }
 }

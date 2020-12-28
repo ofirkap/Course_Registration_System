@@ -1,6 +1,5 @@
 package bgu.spl.net.impl.BGRS;
 
-import bgu.spl.net.Database;
 
 public class Student {
     private final String name;

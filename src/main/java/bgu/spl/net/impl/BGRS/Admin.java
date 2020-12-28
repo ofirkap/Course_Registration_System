@@ -1,7 +1,5 @@
 package bgu.spl.net.impl.BGRS;
 
-import bgu.spl.net.Database;
-
 public class Admin {
     private final String name;
     private final String psw;
