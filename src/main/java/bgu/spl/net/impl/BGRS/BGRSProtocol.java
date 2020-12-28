@@ -4,36 +4,53 @@ import bgu.spl.net.api.MessagingProtocol;
 
 public class BGRSProtocol implements MessagingProtocol<Message> {
     private boolean shouldTerminate = false;
+    private String info = "";
 
     @Override
     public Message process(Message message) {
-        Database dataBase = Database.getInstance();
         shouldTerminate = message.getOPCode() == 4;
-        boolean succeeded = false;
-        String info = "";
+        boolean succeeded = messageSorter(message);
+        return createMessage(succeeded, message.getOPCode(), info);
+    }
+
+    private boolean messageSorter(Message message){
+        Database dataBase = Database.getInstance();
         switch (message.getOPCode()) {
             case 1:
                 if (message.getName() != null && message.getPass() != null)
-                    succeeded = dataBase.registerAdmin(message.getName(), message.getPass());
-                break;
+                    return dataBase.registerAdmin(message.getName(), message.getPass());
             case 2:
                 if (message.getName() != null && message.getPass() != null)
-                    succeeded = dataBase.registerStudent(message.getName(), message.getPass());
-                break;
+                    return dataBase.registerStudent(message.getName(), message.getPass());
             case 3:
                 if (message.getName() != null && message.getPass() != null)
-                    succeeded = dataBase.login(message.getName(), message.getPass());
-                break;
+                    return dataBase.login(message.getName(), message.getPass());
             case 4:
+                if (!dataBase.logout(""))
+                    shouldTerminate = false;
+                return shouldTerminate;
             case 5:
+                return dataBase.registerCourse("",message.getCourseNum());
             case 6:
+                info = dataBase.kdamCheck(message.getCourseNum());
+                return  (info != null);
             case 7:
+                info = dataBase.courseStat(message.getCourseNum());
+                return  (info != null);
             case 8:
+                info = dataBase.studentStat(message.getName());
+                return  (info != null);
             case 9:
+                info = dataBase.isRegistered("",message.getCourseNum());
+                return  (info != null);
             case 10:
+                return dataBase.unregister("",message.getCourseNum());
             case 11:
+                info = dataBase.myCourses("");
+                return  (info != null);
+            default:
+                return false;
         }
-        return createMessage(succeeded, message.getOPCode(), info);
     }
 
     private Message createMessage(boolean succeeded, short returnOPCode, String returnInfo) {

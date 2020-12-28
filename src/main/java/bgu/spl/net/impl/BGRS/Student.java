@@ -5,11 +5,10 @@ public class Student {
     private final String name;
     private final String psw;
     private boolean loggedIn = false;
-    private boolean[] courses;
+    private final boolean[] courses = new boolean[Database.getInstance().getNumberOfCourses()];
     public Student(String name,String psw){
         this.name = name;
         this.psw = psw;
-        courses = new boolean[Database.getInstance().getNumberOfCourses()];
     }
 
     public boolean isLoggedIn() {
@@ -30,5 +29,9 @@ public class Student {
 
     public String getName() {
         return name;
+    }
+
+    public void register(int index){
+        courses[index] = true;
     }
 }

@@ -4,6 +4,7 @@ package bgu.spl.net.impl.BGRS;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,7 +71,7 @@ public class Database {
                 i--;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            return false;
         }
         return true;
     }
@@ -119,7 +120,7 @@ public class Database {
             if (tempS == null || !pass.equals(tempS.getPsw()) || tempS.isLoggedIn())
                 return false;
             tempS.logInOrOut();
-        }else {
+        } else {
             if (!pass.equals(tempA.getPsw()) || tempA.isLoggedIn())
                 return false;
             tempA.logInOrOut();
@@ -133,25 +134,19 @@ public class Database {
      * @param name the name of the user preforming the action
      * @return true if logout successful, false otherwise
      */
-    public boolean logoutAdmin(String name) {
-        Admin temp = adminUsers.get(name);
-        if (temp == null || !temp.isLoggedIn())
-            return false;
-        temp.logInOrOut();
-        return true;
-    }
-
-    /**
-     * logout if registered and logged in
-     *
-     * @param name the name of the user preforming the action
-     * @return true if logout successful, false otherwise
-     */
-    public boolean logoutStudent(String name) {
-        Student temp = studentUsers.get(name);
-        if (temp == null || !temp.isLoggedIn())
-            return false;
-        temp.logInOrOut();
+    public boolean logout(String name) {
+        Admin tempA = adminUsers.get(name);
+        //if no admin registered under that name, try a student
+        if (tempA == null) {
+            Student tempS = studentUsers.get(name);
+            if (tempS == null || !tempS.isLoggedIn())
+                return false;
+            tempS.logInOrOut();
+        } else {
+            if (!tempA.isLoggedIn())
+                return false;
+            tempA.logInOrOut();
+        }
         return true;
     }
 
@@ -164,9 +159,9 @@ public class Database {
      */
     public boolean registerCourse(String name, int num) {
         Student student = studentUsers.get(name);
-        if (student == null || !student.isLoggedIn())
-            return false;
         Course course = findCourse(num);
+        if (student == null || !student.isLoggedIn() || course == null)
+            return false;
         //if the student is already registered return false
         if (course.isRegistered(name) != -1)
             return false;
@@ -179,7 +174,7 @@ public class Database {
             if (courses[i] == course)
                 locationOfCourse = i;
         }
-        boolean ans = false;
+        boolean ans;
         //loop on all the required kdams for 'course'
         for (int courseNum : kdams) {
             ans = false;
@@ -202,7 +197,7 @@ public class Database {
         //synchronized prevents the student 'name' from registering to courses while printing his stats
         synchronized (student) {
             //add the course to the student's registered courses
-            registered[locationOfCourse] = true;
+            student.register(locationOfCourse);
         }
         return true;
     }
@@ -213,7 +208,10 @@ public class Database {
      */
     //you must be logged in to check this?
     public String kdamCheck(int num) {
-        return "\n" + findCourse(num).getKdamCourses().toString();
+        Course course = findCourse(num);
+        if (course == null)
+            return null;
+        return "\n" + Arrays.toString(course.getKdamCourses());
     }
 
     /**
@@ -221,10 +219,12 @@ public class Database {
      * @print the information of the course 'num'
      */
     public String courseStat(int num) {
-        Course curr = findCourse(num);
-        return ("\n" + "Course: " + "(" + num + ")" + curr.getName() +
-                "\n" + "Seats Available: " + (curr.getMaxSeats() - curr.getSeatsTaken().intValue()) + "/" + curr.getMaxSeats() +
-                "\n" + "Students Registered: " + curr.getRegisteredStudents());
+        Course course = findCourse(num);
+        if (course == null)
+            return null;
+        return ("\n" + "Course: " + "(" + num + ") " + course.getName() +
+                "\n" + "Seats Available: " + (course.getMaxSeats() - course.getSeatsTaken().intValue()) + "/" + course.getMaxSeats() +
+                "\n" + "Students Registered: " + Arrays.toString(course.getRegisteredStudents()));
     }
 
     /**
@@ -233,6 +233,8 @@ public class Database {
      */
     public String studentStat(String name) {
         Student student = studentUsers.get(name);
+        if (student == null)
+            return null;
         List<Integer> ans = new LinkedList<>();
         //synchronized prevents the student 'name' from registering to courses while printing his stats
         synchronized (student) {
@@ -251,9 +253,12 @@ public class Database {
      * @return "REGISTERED" if the student 'name' is registered to course 'num' or "UNREGISTERED" otherwise
      */
     public String isRegistered(String name, int num) {
-        if (findCourse(num).isRegistered(name) != -1)
+        Course course = findCourse(num);
+        if (course == null)
+            return null;
+        if (course.isRegistered(name) != -1)
             return "\n" + "REGISTERED";
-        return "\n" + "UNREGISTERED";
+        return "\n" + "NOT REGISTERED";
     }
 
     /**
@@ -266,6 +271,8 @@ public class Database {
     public boolean unregister(String name, int num) {
         Student student = studentUsers.get(name);
         Course course = findCourse(num);
+        if (course == null || student == null || !student.isLoggedIn())
+            return false;
         int index = course.isRegistered(student.getName());
         if (index == -1)
             return false;
@@ -285,11 +292,19 @@ public class Database {
      * @return a list representing the courses that student 'name' is registered to
      */
     public String myCourses(String name) {
+        Student student = studentUsers.get(name);
+        if (student == null || !student.isLoggedIn())
+            return null;
         List<Integer> ans = new LinkedList<>();
-        boolean[] toAns = studentUsers.get(name).getCourses();
+        boolean[] toAns = student.getCourses();
         for (int i = courses.length - 1; i >= 0; i--)
             if (toAns[i])
                 ans.add(courses[i].getNum());
         return "\n" + ans.toString();
+    }
+
+    public void clear(){
+        adminUsers.clear();
+        studentUsers.clear();
     }
 }

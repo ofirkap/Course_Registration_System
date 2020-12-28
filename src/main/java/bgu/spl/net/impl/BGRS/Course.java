@@ -8,9 +8,9 @@ public class Course {
     private final int num;
     private final String name;
     private final int maxSeats;
-    private AtomicInteger seatsTaken = new AtomicInteger(0);
+    private final AtomicInteger seatsTaken = new AtomicInteger(0);
     private final int[] kdamCourses;
-    private String[] registeredStudents;
+    private final String[] registeredStudents;
 
     public Course(int num, String name, int[] kdamCourses, int maxSeats) {
         this.num = num;
@@ -45,13 +45,12 @@ public class Course {
     }
 
     public synchronized boolean addStudent(String name) {
-        if(seatsTaken.intValue() == maxSeats)
+        if (seatsTaken.intValue() == maxSeats)
             return false;
         for (int i = 0; i < seatsTaken.intValue(); i++) {
             if (name.compareTo(registeredStudents[i]) > 0) {
-                for (int j = seatsTaken.intValue(); j > i; j--) {
+                for (int j = seatsTaken.intValue(); j > i; j--)
                     registeredStudents[j] = registeredStudents[j - 1];
-                }
                 registeredStudents[i] = name;
                 break;
             }
@@ -60,14 +59,15 @@ public class Course {
         return true;
     }
 
-    public synchronized void removeStudent(int index){
-        for (int j = index;j<seatsTaken.intValue() -1; j++) {
-            registeredStudents[j] = registeredStudents[j+1];
-        }
-        registeredStudents[seatsTaken.intValue()-1] = null;
+    public synchronized void removeStudent(int index) {
+        for (int j = index; j < seatsTaken.intValue() - 1; j++)
+            registeredStudents[j] = registeredStudents[j + 1];
+        registeredStudents[seatsTaken.intValue() - 1] = null;
         seatsTaken.decrementAndGet();
     }
-    public synchronized int isRegistered(String name){
-        return Arrays.binarySearch(registeredStudents,name);
+
+    public synchronized int isRegistered(String name) {
+        int ans = Arrays.binarySearch(registeredStudents, name);
+        return (registeredStudents[ans].equals(name)) ? ans : -1;
     }
 }
