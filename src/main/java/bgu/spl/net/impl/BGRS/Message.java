@@ -2,7 +2,7 @@ package bgu.spl.net.impl.BGRS;
 
 /**
  * Passive object representing a message sent from the client to the server
- * a message can contain up to 5 fields, depending on its OPCode
+ * a message can contain up to 6 fields, depending on its OPCode
  */
 
 public class Message {

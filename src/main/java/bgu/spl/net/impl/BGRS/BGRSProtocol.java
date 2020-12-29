@@ -13,6 +13,10 @@ public class BGRSProtocol implements MessagingProtocol<Message> {
         return createMessage(succeeded, message.getOPCode(), info);
     }
 
+    /**
+     * used to sort messages by their OPCode and request the corresponding action from the server
+     * @return true if action was successful, false otherwise
+     */
     private boolean messageSorter(Message message){
         Database dataBase = Database.getInstance();
         switch (message.getOPCode()) {
@@ -53,6 +57,12 @@ public class BGRSProtocol implements MessagingProtocol<Message> {
         }
     }
 
+    /**
+     * @param succeeded used to determine whether we're sending an ACK or ERR message
+     * @param returnOPCode the number of action we are returning an answer for
+     * @param returnInfo the information we're returning (if existent)
+     * @return a new {@link Message} with the aforementioned parameters
+     */
     private Message createMessage(boolean succeeded, short returnOPCode, String returnInfo) {
         Message ans = new Message(succeeded ? (short) 12 : (short) 13);
         ans.setReturnOPCode(returnOPCode);

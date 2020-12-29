@@ -9,16 +9,19 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     private byte[] bytes = new byte[1 << 10]; //start with 1k
     private int len = 0;
-    private Message decoded = null;
+    private Message decoded = null; //the eventual message we will return
 
     @Override
     public Message decodeNextByte(byte nextByte) {
+        //if we are still decoding the OPCode of the message
         if (decoded == null) {
             if (len == 2)
+                //we successfully decoded the OPCode of the message, insert it into 'decoded'
                 decoded = new Message(bytesToShort());
             pushByte(nextByte);
             return null; //not a line yet
         } else {
+            //we successfully decoded the OPCode and will move onto decoding the rest according to the OPCode
             switch (decoded.getOPCode()) {
                 case 1:
                 case 2:
@@ -34,11 +37,16 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
                     return decodeType3(nextByte);
                 default:
                     clearBytes();
+                    //for message of type 4 (LOGOUT) we have only an OPCode
                     return decoded;
             }
         }
     }
 
+    /**
+     * used to encode messages of types: ACK, ERR
+     * @return a byte array representing the encoded message
+     */
     @Override
     public byte[] encode(Message message) {
         shortToBytes(message.getOPCode());
@@ -46,7 +54,12 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         byte[] temp = message.getReturnInfo().getBytes(StandardCharsets.UTF_8);
         for (byte e : temp)
             pushByte(e);
-        return Arrays.copyOf(bytes, len + 1);
+        //if it's an ACK message we need to add a 00 byte at the end
+        if(message.getOPCode()==12)
+            len++;
+        temp = Arrays.copyOf(bytes, len);
+        clearBytes();
+        return temp;
     }
 
     private void pushByte(byte nextByte) {
@@ -61,7 +74,10 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         clearBytes();
         return result;
     }
-
+    /**
+     * used to decode messages of types: ADMINREG, STUDENTREG, LOGIN
+     * @return decoded if finished decoding and reached a '0' byte, null otherwise
+     */
     private Message decodeType1(byte nextByte) {
         if (nextByte == '\0') {
             if (decoded.getName() != null) {
@@ -77,6 +93,10 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         }
     }
 
+    /**
+     * used to decode messages of types: COURSEREG, KDAMCHECK, COURSESTAT, ISREGISTERED
+     * @return decoded if finished decoding after 2 bytes, null otherwise
+     */
     private Message decodeType2(byte nextByte) {
         if (len == 1) {
             pushByte(nextByte);
@@ -88,6 +108,10 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         }
     }
 
+    /**
+     * used to decode messages of type: STUDENTSTAT
+     * @return decoded if finished decoding and reached a '0' byte, null otherwise
+     */
     private Message decodeType3(byte nextByte) {
         if (nextByte == '\0') {
             decoded.setName(popString());
