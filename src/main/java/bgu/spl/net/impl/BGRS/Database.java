@@ -58,17 +58,12 @@ public class Database {
             }
             this.courses = new Course[temp.size()];
             //The courses have been added to the string in a backwards order so we iterate from the end
-            int i = temp.size() - 1;
+            int i = 0;
             for (String course : temp) {
                 //split each string to its 4 components as written in the file
                 String[] parts = course.split("\\|");
-                //split the string representing the kdams while ignoring the brackets ('[',']')
-                String[] stringKdams = parts[2].substring(1, parts[2].length() - 1).split(",");
-                int[] intKdams = new int[stringKdams.length];
-                for (int j = 0; j < stringKdams.length; j++)
-                    intKdams[j] = Integer.parseInt(stringKdams[j]);
-                courses[i] = new Course(Integer.parseInt(parts[0]), parts[1], intKdams, Integer.parseInt(parts[3]));
-                i--;
+                courses[i] = new Course(Integer.parseInt(parts[0]), parts[1], stringToIntArray(parts[2]), Integer.parseInt(parts[3]));
+                i++;
             }
         } catch (IOException e) {
             return false;
@@ -76,6 +71,16 @@ public class Database {
         return true;
     }
 
+    private int[] stringToIntArray(String str){
+        String[] stringArr = str.substring(1, str.length() - 1).split(",");
+        if (!stringArr[0].equals("")) {
+            int[] intArr = new int[stringArr.length];
+            for (int i = 0; i < stringArr.length; i++)
+                intArr[i] = Integer.parseInt(stringArr[i]);
+            return intArr;
+        }
+        return new int[0];
+    }
     public int getNumberOfCourses() {
         return courses.length;
     }
@@ -163,7 +168,7 @@ public class Database {
         if (student == null || !student.isLoggedIn() || course == null)
             return false;
         //if the student is already registered return false
-        if (course.isRegistered(name) != -1)
+        if (course.isRegistered(name))
             return false;
         int[] kdams = course.getKdamCourses();
         boolean[] registered = student.getCourses();
@@ -190,9 +195,9 @@ public class Database {
                 return false;
         }
         //if we got here 'student' fulfills all the kdam requirements
-        //add 'student' to the students registered to 'course'
-        //this function can fail if there are no seats available
-        if (!courses[locationOfCourse].addStudent(name))
+
+        //add 'student' to the students registered to 'course', this function can fail if there are no seats available
+        if (!course.addStudent(name))
             return false;
         //synchronized prevents the student 'name' from registering to courses while printing his stats
         synchronized (student) {
@@ -224,7 +229,7 @@ public class Database {
             return null;
         return ("\n" + "Course: " + "(" + num + ") " + course.getName() +
                 "\n" + "Seats Available: " + (course.getMaxSeats() - course.getSeatsTaken().intValue()) + "/" + course.getMaxSeats() +
-                "\n" + "Students Registered: " + Arrays.toString(course.getRegisteredStudents()));
+                "\n" + "Students Registered: " + course.getRegisteredStudents());
     }
 
     /**
@@ -256,7 +261,7 @@ public class Database {
         Course course = findCourse(num);
         if (course == null)
             return null;
-        if (course.isRegistered(name) != -1)
+        if (course.isRegistered(name))
             return "\n" + "REGISTERED";
         return "\n" + "NOT REGISTERED";
     }
@@ -273,17 +278,18 @@ public class Database {
         Course course = findCourse(num);
         if (course == null || student == null || !student.isLoggedIn())
             return false;
-        int index = course.isRegistered(student.getName());
-        if (index == -1)
+        if (!course.isRegistered(student.getName()))
             return false;
-        course.removeStudent(index);
+        if(!course.removeStudent(name))
+            return false;
+        int flag = 0;
         for (int i = 0; i < courses.length; i++) {
             if (courses[i] == course) {
-                index = i;
+                flag = i;
                 break;
             }
         }
-        student.getCourses()[index] = false;
+        student.getCourses()[flag] = false;
         return true;
     }
 

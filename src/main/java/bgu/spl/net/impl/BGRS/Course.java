@@ -1,6 +1,7 @@
 package bgu.spl.net.impl.BGRS;
 
-import java.util.Arrays;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Course {
@@ -10,14 +11,14 @@ public class Course {
     private final int maxSeats;
     private final AtomicInteger seatsTaken = new AtomicInteger(0);
     private final int[] kdamCourses;
-    private final String[] registeredStudents;
+    private final SortedSet<String> registeredStudents;
 
     public Course(int num, String name, int[] kdamCourses, int maxSeats) {
         this.num = num;
         this.name = name;
         this.maxSeats = maxSeats;
         this.kdamCourses = kdamCourses;
-        this.registeredStudents = new String[maxSeats];
+        this.registeredStudents = new TreeSet<>();
     }
 
     public int getNum() {
@@ -40,34 +41,27 @@ public class Course {
         return kdamCourses;
     }
 
-    public synchronized String[] getRegisteredStudents() {
+    public synchronized SortedSet<String> getRegisteredStudents() {
         return registeredStudents;
     }
 
     public synchronized boolean addStudent(String name) {
         if (seatsTaken.intValue() == maxSeats)
             return false;
-        for (int i = 0; i < seatsTaken.intValue(); i++) {
-            if (name.compareTo(registeredStudents[i]) > 0) {
-                for (int j = seatsTaken.intValue(); j > i; j--)
-                    registeredStudents[j] = registeredStudents[j - 1];
-                registeredStudents[i] = name;
-                break;
-            }
-        }
+        if (!registeredStudents.add(name))
+            return false;
         seatsTaken.incrementAndGet();
         return true;
     }
 
-    public synchronized void removeStudent(int index) {
-        for (int j = index; j < seatsTaken.intValue() - 1; j++)
-            registeredStudents[j] = registeredStudents[j + 1];
-        registeredStudents[seatsTaken.intValue() - 1] = null;
+    public synchronized boolean removeStudent(String name) {
+        if (!registeredStudents.remove(name))
+            return false;
         seatsTaken.decrementAndGet();
+        return true;
     }
 
-    public synchronized int isRegistered(String name) {
-        int ans = Arrays.binarySearch(registeredStudents, name);
-        return (registeredStudents[ans].equals(name)) ? ans : -1;
+    public synchronized boolean isRegistered(String name) {
+        return registeredStudents.contains(name);
     }
 }

@@ -13,6 +13,7 @@ class DatabaseTest {
     @BeforeEach
     void setUp() {
         database.clear();
+        initialize();
     }
 
     @AfterEach
@@ -23,7 +24,7 @@ class DatabaseTest {
     @Test
     void initialize() {
         assertFalse(database.initialize(""));
-        database.initialize("/home/spl211/IdeaProjects/spl-net");
+        database.initialize("/home/spl211/IdeaProjects/spl-net/Courses.txt");
         assertEquals(database.courseStat(2),"\n" +
                 "Course: (2) two" + "\n" +
                 "Seats Available: 3/3" + "\n" +
@@ -97,11 +98,11 @@ class DatabaseTest {
 
     @Test
     void isRegistered() {
-        assertEquals(database.isRegistered("student1",1),"NOT REGISTERED");
+        assertEquals(database.isRegistered("student1",1),"\n" + "NOT REGISTERED");
         database.registerStudent("student1", "123");
         database.login("student1", "123");
         database.registerCourse("student1", 1);
-        assertEquals(database.isRegistered("student1",1),"REGISTERED");
+        assertEquals(database.isRegistered("student1",1),"\n" + "REGISTERED");
     }
 
     @Test

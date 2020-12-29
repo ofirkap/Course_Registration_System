@@ -7,7 +7,7 @@ package bgu.spl.net.impl.BGRS;
 
 public class Message {
     private final short OPCode;
-    private int courseNum = 0;
+    private short courseNum = 0;
     private String name = null;
     private String pass = null;
     private short returnOPCode = 0;
@@ -25,7 +25,7 @@ public class Message {
         return courseNum;
     }
 
-    public void setCourseNum(int courseNum) {
+    public void setCourseNum(short courseNum) {
         this.courseNum = courseNum;
     }
 
