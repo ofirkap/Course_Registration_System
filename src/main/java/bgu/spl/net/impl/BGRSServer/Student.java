@@ -1,14 +1,18 @@
-package bgu.spl.net.impl.BGRS;
+package bgu.spl.net.impl.BGRSServer;
 
+
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class Student {
     private final String name;
     private final String psw;
     private boolean loggedIn = false;
-    private final boolean[] courses = new boolean[Database.getInstance().getNumberOfCourses()];
+    private final SortedSet<Course> courses;
     public Student(String name,String psw){
         this.name = name;
         this.psw = psw;
+        this.courses = new TreeSet<>();
     }
 
     public boolean isLoggedIn() {
@@ -19,7 +23,7 @@ public class Student {
         loggedIn = !loggedIn;
     }
 
-    public boolean[] getCourses() {
+    public SortedSet<Course> getCourses() {
         return courses;
     }
 
@@ -31,7 +35,13 @@ public class Student {
         return name;
     }
 
-    public void register(int index){
-        courses[index] = true;
+    public void register(Course course){
+        courses.add(course);
     }
+
+    public void unregister(Course course){
+        courses.remove(course);
+    }
+
+    public boolean isRegistered(Course course){return courses.contains(course);}
 }

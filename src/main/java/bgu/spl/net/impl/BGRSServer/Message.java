@@ -1,4 +1,4 @@
-package bgu.spl.net.impl.BGRS;
+package bgu.spl.net.impl.BGRSServer;
 
 /**
  * Passive object representing a message sent from the client to the server

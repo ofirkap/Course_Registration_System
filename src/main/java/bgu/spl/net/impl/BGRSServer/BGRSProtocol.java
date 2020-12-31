@@ -1,13 +1,16 @@
-package bgu.spl.net.impl.BGRS;
+package bgu.spl.net.impl.BGRSServer;
 
 import bgu.spl.net.api.MessagingProtocol;
 
 public class BGRSProtocol implements MessagingProtocol<Message> {
     private boolean shouldTerminate = false;
     private String info = "";
+    private String userName = null;
 
     @Override
     public Message process(Message message) {
+        if (userName == null && (message.getOPCode() == 1 || message.getOPCode() == 2))
+            userName = message.getName();
         shouldTerminate = message.getOPCode() == 4;
         boolean succeeded = messageSorter(message);
         return createMessage(succeeded, message.getOPCode(), info);
@@ -15,52 +18,55 @@ public class BGRSProtocol implements MessagingProtocol<Message> {
 
     /**
      * used to sort messages by their OPCode and request the corresponding action from the server
+     *
      * @return true if action was successful, false otherwise
      */
-    private boolean messageSorter(Message message){
+    private boolean messageSorter(Message message) {
         Database dataBase = Database.getInstance();
         switch (message.getOPCode()) {
             case 1:
-                if (message.getName() != null && message.getPass() != null)
+                if (message.getName() != null && message.getPass() != null && userName.equals(message.getName()))
                     return dataBase.registerAdmin(message.getName(), message.getPass());
+                userName = null;
             case 2:
-                if (message.getName() != null && message.getPass() != null)
+                if (message.getName() != null && message.getPass() != null && userName.equals(message.getName()))
                     return dataBase.registerStudent(message.getName(), message.getPass());
+                userName = null;
             case 3:
                 if (message.getName() != null && message.getPass() != null)
                     return dataBase.login(message.getName(), message.getPass());
             case 4:
-                if (!dataBase.logout(""))
+                if (!dataBase.logout(userName))
                     shouldTerminate = false;
                 return shouldTerminate;
             case 5:
-                return dataBase.registerCourse("",message.getCourseNum());
+                return dataBase.registerCourse(userName, message.getCourseNum());
             case 6:
                 info = dataBase.kdamCheck(message.getCourseNum());
-                return  (info != null);
+                return (info != null);
             case 7:
-                info = dataBase.courseStat(message.getCourseNum());
-                return  (info != null);
+                info = dataBase.courseStat(userName, message.getCourseNum());
+                return (info != null);
             case 8:
-                info = dataBase.studentStat(message.getName());
-                return  (info != null);
+                info = dataBase.studentStat(userName, message.getName());
+                return (info != null);
             case 9:
-                info = dataBase.isRegistered("",message.getCourseNum());
-                return  (info != null);
+                info = dataBase.isRegistered(userName, message.getCourseNum());
+                return (info != null);
             case 10:
-                return dataBase.unregister("",message.getCourseNum());
+                return dataBase.unregister(userName, message.getCourseNum());
             case 11:
-                info = dataBase.myCourses("");
-                return  (info != null);
+                info = dataBase.myCourses(userName);
+                return (info != null);
             default:
                 return false;
         }
     }
 
     /**
-     * @param succeeded used to determine whether we're sending an ACK or ERR message
+     * @param succeeded    used to determine whether we're sending an ACK or ERR message
      * @param returnOPCode the number of action we are returning an answer for
-     * @param returnInfo the information we're returning (if existent)
+     * @param returnInfo   the information we're returning (if existent)
      * @return a new {@link Message} with the aforementioned parameters
      */
     private Message createMessage(boolean succeeded, short returnOPCode, String returnInfo) {

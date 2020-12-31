@@ -1,4 +1,4 @@
-package bgu.spl.net.impl.BGRS;
+package bgu.spl.net.impl.BGRSServer;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,9 @@ class DatabaseTest {
     void initialize() {
         assertFalse(database.initialize(""));
         database.initialize("/home/spl211/IdeaProjects/spl-net/Courses.txt");
-        assertEquals(database.courseStat(2),"\n" +
+        database.registerAdmin("admin1", "123");
+        database.login("admin1", "123");
+        assertEquals(database.courseStat("admin1",2),"\n" +
                 "Course: (2) two" + "\n" +
                 "Seats Available: 3/3" + "\n" +
                 "Students Registered: []");
@@ -33,8 +35,8 @@ class DatabaseTest {
 
     @Test
     void registerAdmin() {
-        assertTrue(database.registerAdmin("admin1", "123"));
-        assertFalse(database.registerAdmin("admin1", "123"));
+        assertTrue(database.registerAdmin("admin2", "123"));
+        assertFalse(database.registerAdmin("admin2", "123"));
 
     }
 
@@ -49,9 +51,9 @@ class DatabaseTest {
         assertFalse(database.login("student1", "123"));
         database.registerStudent("student1", "123");
         assertFalse(database.login("student1", "12"));
-        assertFalse(database.login("admin1", "123"));
-        database.registerAdmin("admin1", "123");
-        assertTrue(database.login("admin1", "123"));
+        assertFalse(database.login("admin3", "123"));
+        database.registerAdmin("admin3", "123");
+        assertTrue(database.login("admin3", "123"));
     }
 
     @Test
@@ -80,20 +82,25 @@ class DatabaseTest {
 
     @Test
     void courseStat() {
-        System.out.println(database.courseStat(1));
+        database.registerAdmin("admin1", "123");
+        database.login("admin1", "123");
+        System.out.println(database.courseStat("admin1",1));
         database.registerStudent("student1", "123");
         database.login("student1", "123");
         database.registerCourse("student1", 1);
-        System.out.println(database.courseStat(1));
+        System.out.println(database.courseStat("admin1",1));
     }
 
     @Test
     void studentStat() {
-        assertNull(database.studentStat("student1"));
+        database.registerAdmin("admin1", "123");
+        database.login("admin1", "123");        database.login("admin1", "123");
+
+        assertNull(database.studentStat("admin1","student1"));
         database.registerStudent("student1", "123");
         database.login("student1", "123");
         database.registerCourse("student1", 1);
-        System.out.println(database.studentStat("student1"));
+        System.out.println(database.studentStat("admin1","student1"));
     }
 
     @Test

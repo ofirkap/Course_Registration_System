@@ -1,4 +1,4 @@
-package bgu.spl.net.impl.BGRS;
+package bgu.spl.net.impl.BGRSServer;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 
@@ -45,6 +45,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     /**
      * used to encode messages of types: ACK, ERR
+     *
      * @return a byte array representing the encoded message
      */
     @Override
@@ -55,7 +56,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         for (byte e : temp)
             pushByte(e);
         //if it's an ACK message we need to add a 00 byte at the end
-        if(message.getOPCode()==12)
+        if (message.getOPCode() == 12)
             len++;
         temp = Arrays.copyOf(bytes, len);
         clearBytes();
@@ -74,8 +75,10 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         clearBytes();
         return result;
     }
+
     /**
      * used to decode messages of types: ADMINREG, STUDENTREG, LOGIN
+     *
      * @return decoded if finished decoding and reached a '0' byte, null otherwise
      */
     private Message decodeType1(byte nextByte) {
@@ -95,6 +98,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     /**
      * used to decode messages of types: COURSEREG, KDAMCHECK, COURSESTAT, ISREGISTERED
+     *
      * @return decoded if finished decoding after 2 bytes, null otherwise
      */
     private Message decodeType2(byte nextByte) {
@@ -110,6 +114,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     /**
      * used to decode messages of type: STUDENTSTAT
+     *
      * @return decoded if finished decoding and reached a '0' byte, null otherwise
      */
     private Message decodeType3(byte nextByte) {
@@ -135,7 +140,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     }
 
     private void clearBytes() {
-        Arrays.fill(bytes, (byte) 0);
+        bytes = new byte[1 << 10]; //start with 1k
         len = 0;
     }
 }
