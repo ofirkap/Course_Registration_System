@@ -2,7 +2,7 @@ package bgu.spl.net.impl.BGRSServer;
 
 
 import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Student {
     private final String name;
@@ -12,7 +12,7 @@ public class Student {
     public Student(String name,String psw){
         this.name = name;
         this.psw = psw;
-        this.courses = new TreeSet<>();
+        this.courses = new ConcurrentSkipListSet<>();
     }
 
     public boolean isLoggedIn() {

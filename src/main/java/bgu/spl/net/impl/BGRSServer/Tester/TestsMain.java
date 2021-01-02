@@ -6,7 +6,7 @@ public class TestsMain {
 
     public static void main(String [] args)
     {
-        int numOfClients = 1;
+        int numOfClients = 25;
         ClientHandler cHandler = new ClientHandler("localhost",7777,numOfClients);
         cHandler.initiateClients();
 

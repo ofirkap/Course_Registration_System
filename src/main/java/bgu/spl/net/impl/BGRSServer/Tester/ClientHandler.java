@@ -1,7 +1,6 @@
 package bgu.spl.net.impl.BGRSServer.Tester;
 import  java.util.ArrayList;
 import  java.util.HashMap;
-import  java.util.concurrent.ConcurrentHashMap;
 import  java.util.concurrent.CountDownLatch;
 import  java.util.concurrent.atomic.AtomicBoolean;
 
@@ -48,27 +47,6 @@ public class ClientHandler {
         for(Client c : connectedClients)
             c.shutDown();
     }
-
-    public ConcurrentHashMap<Client,Boolean> processSpecificCommandsOnClients(String command,String firstParam, String secondParam, int extraParam) {
-        ConcurrentHashMap<Client,Boolean> commandsStatuses = new ConcurrentHashMap<>();
-        try {
-            CountDownLatch waitFinishedProcessing = new CountDownLatch(connectedClients.size());
-            for (Client c : connectedClients) {
-                new Thread(() -> {
-                    synchronized (c) {
-                        commandsStatuses.put(c, c.sendCommandAndValidateResponse((short) (commands.get(command).intValue()), firstParam, secondParam));
-                        waitFinishedProcessing.countDown();
-                    }
-                }
-                ).start();
-            }
-            waitFinishedProcessing.await();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return commandsStatuses;
-    }
-
 
     public boolean processSpecificCommandOnClient(Client c, String command,String firstParam, String secondParam) {
         AtomicBoolean commandSuccess = new AtomicBoolean(false);

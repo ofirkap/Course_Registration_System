@@ -59,14 +59,14 @@ public class Database {
                 temp.add(line);
                 line = br.readLine();
             }
-            this.courses = new Course[temp.size()];
-            //The courses have been added to the string in a backwards order so we iterate from the end
-            int i = 0;
+            this.courses = new Course[temp.size() + 1];
+            courses[0] = null; //in case we try to input an illegal course number
+            int i = 1;
             for (String course : temp) {
                 //split each string to its 4 components as written in the file
                 String[] parts = course.split("\\|");
                 courses[i] = new Course(i, Integer.parseInt(parts[0]), parts[1], stringToIntArray(parts[2]), Integer.parseInt(parts[3]));
-                courseSerials.put(courses[i].getNum(),i);
+                courseSerials.put(courses[i].getNum(), i);
                 i++;
             }
         } catch (IOException e) {
@@ -158,7 +158,7 @@ public class Database {
      */
     public boolean registerCourse(String name, int num) {
         Student student = studentUsers.get(name);
-        Course course = courses[courseSerials.get(num)];
+        Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (student == null || !student.isLoggedIn() || course == null)
             return false;
         //if the student is already registered return false
@@ -184,11 +184,19 @@ public class Database {
      * @param num the number of course to check
      * @return the array of kdams required for course 'num'
      */
-    //you must be logged in to check this?
-    public String kdamCheck(int num) {
-        Course course = courses[courseSerials.get(num)];
+    public String kdamCheck(String name, int num) {
+        //check if the user preforming the action is logged in
+        Student student = studentUsers.get(name);
+        if (student == null || !student.isLoggedIn()) {
+            Admin admin = adminUsers.get(name);
+            if (admin == null || !admin.isLoggedIn())
+                return null;
+        }
+        //check if the course exists in the database
+        Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (course == null)
             return null;
+        //get the kdams and return them
         return "\n" + Arrays.toString(course.getKdamCourses());
     }
 
@@ -198,7 +206,7 @@ public class Database {
      */
     public String courseStat(String user, int num) {
         Admin admin = adminUsers.get(user);
-        Course course = courses[courseSerials.get(num)];
+        Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (admin == null || !admin.isLoggedIn() || course == null)
             return null;
         return ("\n" + "Course: " + "(" + num + ") " + course.getName() +
@@ -225,7 +233,7 @@ public class Database {
      * @return "REGISTERED" if the student 'name' is registered to course 'num' or "UNREGISTERED" otherwise
      */
     public String isRegistered(String name, int num) {
-        Course course = courses[courseSerials.get(num)];
+        Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (course == null)
             return null;
         if (course.isRegistered(name))
@@ -242,7 +250,7 @@ public class Database {
      */
     public boolean unregister(String name, int num) {
         Student student = studentUsers.get(name);
-        Course course = courses[courseSerials.get(num)];
+        Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (course == null || student == null || !student.isLoggedIn())
             return false;
         if (!student.isRegistered(course))

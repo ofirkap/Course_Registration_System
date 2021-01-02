@@ -6,7 +6,7 @@ public class ReactorMain {
     public static void main(String[] args) {
 
         Database database = Database.getInstance();
-        database.initialize("/home/spl211/IdeaProjects/spl-net/Courses.txt");
+        database.initialize("./Courses.txt");
         Server.reactor(
                 Runtime.getRuntime().availableProcessors(),
                 7777, //port

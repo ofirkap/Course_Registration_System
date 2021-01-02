@@ -27,7 +27,7 @@ class DatabaseTest {
         database.initialize("/home/spl211/IdeaProjects/spl-net/Courses.txt");
         database.registerAdmin("admin1", "123");
         database.login("admin1", "123");
-        assertEquals(database.courseStat("admin1",2),"\n" +
+        assertEquals(database.courseStat("admin1", 2), "\n" +
                 "Course: (2) two" + "\n" +
                 "Seats Available: 3/3" + "\n" +
                 "Students Registered: []");
@@ -77,49 +77,52 @@ class DatabaseTest {
 
     @Test
     void kdamCheck() {
-        System.out.println(database.kdamCheck(1));
+        database.registerStudent("student1", "123");
+        database.login("student1", "123");
+        System.out.println(database.kdamCheck("student1", 1));
     }
 
     @Test
     void courseStat() {
         database.registerAdmin("admin1", "123");
         database.login("admin1", "123");
-        System.out.println(database.courseStat("admin1",1));
+        System.out.println(database.courseStat("admin1", 1));
         database.registerStudent("student1", "123");
         database.login("student1", "123");
         database.registerCourse("student1", 1);
-        System.out.println(database.courseStat("admin1",1));
+        System.out.println(database.courseStat("admin1", 1));
     }
 
     @Test
     void studentStat() {
         database.registerAdmin("admin1", "123");
-        database.login("admin1", "123");        database.login("admin1", "123");
+        database.login("admin1", "123");
+        database.login("admin1", "123");
 
-        assertNull(database.studentStat("admin1","student1"));
+        assertNull(database.studentStat("admin1", "student1"));
         database.registerStudent("student1", "123");
         database.login("student1", "123");
         database.registerCourse("student1", 1);
-        System.out.println(database.studentStat("admin1","student1"));
+        System.out.println(database.studentStat("admin1", "student1"));
     }
 
     @Test
     void isRegistered() {
-        assertEquals(database.isRegistered("student1",1),"\n" + "NOT REGISTERED");
+        assertEquals(database.isRegistered("student1", 1), "\n" + "NOT REGISTERED");
         database.registerStudent("student1", "123");
         database.login("student1", "123");
         database.registerCourse("student1", 1);
-        assertEquals(database.isRegistered("student1",1),"\n" + "REGISTERED");
+        assertEquals(database.isRegistered("student1", 1), "\n" + "REGISTERED");
     }
 
     @Test
     void unregister() {
-        assertFalse(database.unregister("student1",1));
+        assertFalse(database.unregister("student1", 1));
         database.registerStudent("student1", "123");
         database.login("student1", "123");
-        assertFalse(database.unregister("student1",1));
+        assertFalse(database.unregister("student1", 1));
         database.registerCourse("student1", 1);
-        assertTrue(database.unregister("student1",1));
+        assertTrue(database.unregister("student1", 1));
     }
 
     @Test

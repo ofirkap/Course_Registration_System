@@ -38,7 +38,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
                 default:
                     clearBytes();
                     //for message of type 4 (LOGOUT) we have only an OPCode
-                    return decoded;
+                    return returnMessage();
             }
         }
     }
@@ -85,7 +85,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         if (nextByte == '\0') {
             if (decoded.getName() != null) {
                 decoded.setPass(popString());
-                return decoded;
+                return returnMessage();
             } else {
                 decoded.setName(popString());
                 return null;
@@ -105,7 +105,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         if (len == 1) {
             pushByte(nextByte);
             decoded.setCourseNum(bytesToShort());
-            return decoded;
+            return returnMessage();
         } else {
             pushByte(nextByte);
             return null; //not a line yet
@@ -120,7 +120,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     private Message decodeType3(byte nextByte) {
         if (nextByte == '\0') {
             decoded.setName(popString());
-            return decoded;
+            return returnMessage();
         } else {
             pushByte(nextByte);
             return null; //not a line yet
@@ -142,5 +142,11 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     private void clearBytes() {
         bytes = new byte[1 << 10]; //start with 1k
         len = 0;
+    }
+
+    private Message returnMessage(){
+        Message temp = decoded;
+        decoded = null;
+        return temp;
     }
 }

@@ -9,7 +9,7 @@ public class BGRSProtocol implements MessagingProtocol<Message> {
 
     @Override
     public Message process(Message message) {
-        if (userName == null && (message.getOPCode() == 1 || message.getOPCode() == 2))
+        if (userName == null && message.getOPCode() == 3)
             userName = message.getName();
         shouldTerminate = message.getOPCode() == 4;
         boolean succeeded = messageSorter(message);
@@ -25,24 +25,25 @@ public class BGRSProtocol implements MessagingProtocol<Message> {
         Database dataBase = Database.getInstance();
         switch (message.getOPCode()) {
             case 1:
-                if (message.getName() != null && message.getPass() != null && userName.equals(message.getName()))
+                if (message.getName() != null && message.getPass() != null)
                     return dataBase.registerAdmin(message.getName(), message.getPass());
-                userName = null;
             case 2:
-                if (message.getName() != null && message.getPass() != null && userName.equals(message.getName()))
+                if (message.getName() != null && message.getPass() != null)
                     return dataBase.registerStudent(message.getName(), message.getPass());
-                userName = null;
             case 3:
                 if (message.getName() != null && message.getPass() != null)
                     return dataBase.login(message.getName(), message.getPass());
+                userName = null;
             case 4:
-                if (!dataBase.logout(userName))
+                if (dataBase.logout(userName))
+                    userName = null;
+                else
                     shouldTerminate = false;
                 return shouldTerminate;
             case 5:
                 return dataBase.registerCourse(userName, message.getCourseNum());
             case 6:
-                info = dataBase.kdamCheck(message.getCourseNum());
+                info = dataBase.kdamCheck(userName, message.getCourseNum());
                 return (info != null);
             case 7:
                 info = dataBase.courseStat(userName, message.getCourseNum());
