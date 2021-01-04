@@ -19,7 +19,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
                 //we successfully decoded the OPCode of the message, insert it into 'decoded'
                 pushByte(nextByte);
                 decoded = new Message(bytesToShort());
-                if (decoded.getOPCode() == 4 || decoded.getOPCode() == 8)
+                if (decoded.getOPCode() == 4 || decoded.getOPCode() == 11)
                     return returnMessage();
                 else return null;
             } else {

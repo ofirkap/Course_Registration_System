@@ -6,6 +6,7 @@ public class TCPMain {
     public static void main(String[] args) {
 
         Database database = Database.getInstance();
+        database.clear();
         database.initialize("./Courses.txt");
         Server.threadPerClient(
                 7777, //port

@@ -74,6 +74,7 @@ public class BGRSProtocol implements MessagingProtocol<Message> {
         Message ans = new Message(succeeded ? (short) 12 : (short) 13);
         ans.setReturnOPCode(returnOPCode);
         ans.setReturnInfo(returnInfo);
+        info = "";
         return ans;
     }
 
