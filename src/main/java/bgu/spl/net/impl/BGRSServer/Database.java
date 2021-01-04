@@ -92,7 +92,7 @@ public class Database {
      * @return true if registration successful, false otherwise
      */
     public boolean registerAdmin(String name, String pass) {
-        return (adminUsers.putIfAbsent(name, new Admin(name, pass)) == null);
+        return (!studentUsers.containsKey(name) && adminUsers.putIfAbsent(name, new Admin(name, pass)) == null);
     }
 
     /**
@@ -101,7 +101,7 @@ public class Database {
      * @return true if registration successful, false otherwise
      */
     public boolean registerStudent(String name, String pass) {
-        return (studentUsers.putIfAbsent(name, new Student(name, pass)) == null);
+        return (!adminUsers.containsKey(name) && studentUsers.putIfAbsent(name, new Student(name, pass)) == null);
     }
 
     /**
@@ -211,8 +211,8 @@ public class Database {
      * @print the information of the course 'num'
      */
     public String courseStat(String user, int num) {
-        if (user.equals(""))
-            return null;
+        if (user == null)
+            return "";
         Admin admin = adminUsers.get(user);
         Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (admin == null || !admin.isLoggedIn() || course == null)
@@ -243,7 +243,7 @@ public class Database {
      * @return "REGISTERED" if the student 'name' is registered to course 'num' or "UNREGISTERED" otherwise
      */
     public String isRegistered(String name, int num) {
-        if (name == null)
+        if (name == null || !studentUsers.containsKey(name))
             return "";
         Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (course == null)

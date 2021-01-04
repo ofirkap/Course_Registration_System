@@ -13,6 +13,5 @@ public class TestsMain {
         Scanner in = new Scanner(System.in);
         System.out.println("MultiThreaded Tester....Have Fun\r\n");
         new Thread(new GeneralTests(cHandler,numOfClients)).start();
-
     }
 }

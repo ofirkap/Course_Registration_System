@@ -49,9 +49,9 @@ public class GeneralTests implements  Runnable {
             new Thread(() -> {
                 synchronized (c) {
                     boolean success;
-                    success = cHandler.processSpecificCommandOnClient(c, "COURSEREG", "667", "");
+                    success = cHandler.processSpecificCommandOnClient(c, "COURSEREG", "1", "");
                     if (success)
-                        success = cHandler.processSpecificCommandOnClient(c, "UNREGISTER", "667", "");
+                        success = cHandler.processSpecificCommandOnClient(c, "UNREGISTER", "1", "");
                     if (!success)
                         System.out.println("Failed Multi Threaded Test!");
                 }

@@ -13,6 +13,5 @@ public class TCPMain {
                 BGRSProtocol::new, //protocol factory
                 BGRSMessageEncoderDecoder::new //message encoder decoder factory
         ).serve();
-
     }
 }

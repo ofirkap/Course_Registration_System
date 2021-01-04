@@ -9,8 +9,6 @@ public class BGRSProtocol implements MessagingProtocol<Message> {
 
     @Override
     public Message process(Message message) {
-        if (userName == null && message.getOPCode() == 3)
-            userName = message.getName();
         shouldTerminate = message.getOPCode() == 4;
         boolean succeeded = messageSorter(message);
         return createMessage(succeeded, message.getOPCode(), info);
@@ -25,15 +23,20 @@ public class BGRSProtocol implements MessagingProtocol<Message> {
         Database dataBase = Database.getInstance();
         switch (message.getOPCode()) {
             case 1:
-                if (message.getName() != null && message.getPass() != null)
+                if (userName == null && message.getName() != null && message.getPass() != null)
                     return dataBase.registerAdmin(message.getName(), message.getPass());
+                return false;
             case 2:
-                if (message.getName() != null && message.getPass() != null)
+                if (userName == null && message.getName() != null && message.getPass() != null)
                     return dataBase.registerStudent(message.getName(), message.getPass());
+                return false;
             case 3:
-                if (message.getName() != null && message.getPass() != null)
-                    return dataBase.login(message.getName(), message.getPass());
-                userName = null;
+                if (userName == null && message.getName() != null && message.getPass() != null)
+                    if (dataBase.login(message.getName(), message.getPass())) {
+                        userName = message.getName();
+                        return true;
+                    } else
+                        return false;
             case 4:
                 if (dataBase.logout(userName))
                     userName = null;
