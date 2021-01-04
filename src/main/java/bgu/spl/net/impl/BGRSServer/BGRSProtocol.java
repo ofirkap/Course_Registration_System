@@ -44,21 +44,21 @@ public class BGRSProtocol implements MessagingProtocol<Message> {
                 return dataBase.registerCourse(userName, message.getCourseNum());
             case 6:
                 info = dataBase.kdamCheck(userName, message.getCourseNum());
-                return (info != null);
+                return (!info.equals(""));
             case 7:
                 info = dataBase.courseStat(userName, message.getCourseNum());
-                return (info != null);
+                return (!info.equals(""));
             case 8:
                 info = dataBase.studentStat(userName, message.getName());
-                return (info != null);
+                return (!info.equals(""));
             case 9:
                 info = dataBase.isRegistered(userName, message.getCourseNum());
-                return (info != null);
+                return (!info.equals(""));
             case 10:
                 return dataBase.unregister(userName, message.getCourseNum());
             case 11:
                 info = dataBase.myCourses(userName);
-                return (info != null);
+                return (!info.equals(""));
             default:
                 return false;
         }

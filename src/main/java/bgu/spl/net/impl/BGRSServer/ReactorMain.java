@@ -6,6 +6,7 @@ public class ReactorMain {
     public static void main(String[] args) {
 
         Database database = Database.getInstance();
+        database.clear();
         database.initialize("./Courses.txt");
         Server.reactor(
                 Runtime.getRuntime().availableProcessors(),
@@ -13,6 +14,5 @@ public class ReactorMain {
                 BGRSProtocol::new, //protocol factory
                 BGRSMessageEncoderDecoder::new //message encoder decoder factory
         ).serve();
-
     }
 }

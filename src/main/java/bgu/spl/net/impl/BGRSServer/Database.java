@@ -190,18 +190,18 @@ public class Database {
      */
     public String kdamCheck(String name, int num) {
         if (name == null)
-            return null;
+            return "";
         //check if the user preforming the action is logged in
         Student student = studentUsers.get(name);
         if (student == null || !student.isLoggedIn()) {
             Admin admin = adminUsers.get(name);
             if (admin == null || !admin.isLoggedIn())
-                return null;
+                return "";
         }
         //check if the course exists in the database
         Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (course == null)
-            return null;
+            return "";
         //get the kdams and return them
         return "\n" + Arrays.toString(course.getKdamCourses());
     }
@@ -211,12 +211,12 @@ public class Database {
      * @print the information of the course 'num'
      */
     public String courseStat(String user, int num) {
-        if (user == null)
+        if (user.equals(""))
             return null;
         Admin admin = adminUsers.get(user);
         Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (admin == null || !admin.isLoggedIn() || course == null)
-            return null;
+            return "";
         return ("\n" + "Course: " + "(" + num + ") " + course.getName() +
                 "\n" + "Seats Available: " + (course.getMaxSeats() - course.getSeatsTaken().intValue()) + "/" + course.getMaxSeats() +
                 "\n" + "Students Registered: " + course.getRegisteredStudents());
@@ -228,11 +228,11 @@ public class Database {
      */
     public String studentStat(String user, String name) {
         if (user == null)
-            return null;
+            return "";
         Admin admin = adminUsers.get(user);
         Student student = studentUsers.get(name);
         if (admin == null || !admin.isLoggedIn() || student == null)
-            return null;
+            return "";
         return ("\n" + "Student: " + student.getName() +
                 "\n" + "Courses: " + student.getCourses());
     }
@@ -244,10 +244,10 @@ public class Database {
      */
     public String isRegistered(String name, int num) {
         if (name == null)
-            return null;
+            return "";
         Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (course == null)
-            return null;
+            return "";
         if (course.isRegistered(name))
             return "\n" + "REGISTERED";
         return "\n" + "NOT REGISTERED";
@@ -281,10 +281,10 @@ public class Database {
      */
     public String myCourses(String name) {
         if (name == null)
-            return null;
+            return "";
         Student student = studentUsers.get(name);
         if (student == null || !student.isLoggedIn())
-            return null;
+            return "";
         return "\n" + student.getCourses();
     }
 
