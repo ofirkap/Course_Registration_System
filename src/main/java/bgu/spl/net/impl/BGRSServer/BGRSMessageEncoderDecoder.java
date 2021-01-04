@@ -15,13 +15,20 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     public Message decodeNextByte(byte nextByte) {
         //if we are still decoding the OPCode of the message
         if (decoded == null) {
-            if (len == 2)
+            if (len == 1) {
                 //we successfully decoded the OPCode of the message, insert it into 'decoded'
+                pushByte(nextByte);
                 decoded = new Message(bytesToShort());
-            pushByte(nextByte);
-            return null; //not a line yet
-        } else {
-            //we successfully decoded the OPCode and will move onto decoding the rest according to the OPCode
+                if (decoded.getOPCode() == 4 || decoded.getOPCode() == 8)
+                    return returnMessage();
+                else return null;
+            } else {
+                pushByte(nextByte);
+                return null;
+            }
+        }
+        //we successfully decoded the OPCode and will move onto decoding the rest according to the OPCode
+        else {
             switch (decoded.getOPCode()) {
                 case 1:
                 case 2:
@@ -144,7 +151,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         len = 0;
     }
 
-    private Message returnMessage(){
+    private Message returnMessage() {
         Message temp = decoded;
         decoded = null;
         return temp;

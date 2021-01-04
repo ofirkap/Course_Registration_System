@@ -134,6 +134,8 @@ public class Database {
      * @return true if logout successful, false otherwise
      */
     public boolean logout(String name) {
+        if (name == null)
+            return false;
         Admin tempA = adminUsers.get(name);
         //if no admin registered under that name, try a student
         if (tempA == null) {
@@ -157,6 +159,8 @@ public class Database {
      * @return true if registered successfully, false otherwise
      */
     public boolean registerCourse(String name, int num) {
+        if (name == null)
+            return false;
         Student student = studentUsers.get(name);
         Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (student == null || !student.isLoggedIn() || course == null)
@@ -185,6 +189,8 @@ public class Database {
      * @return the array of kdams required for course 'num'
      */
     public String kdamCheck(String name, int num) {
+        if (name == null)
+            return null;
         //check if the user preforming the action is logged in
         Student student = studentUsers.get(name);
         if (student == null || !student.isLoggedIn()) {
@@ -205,6 +211,8 @@ public class Database {
      * @print the information of the course 'num'
      */
     public String courseStat(String user, int num) {
+        if (user == null)
+            return null;
         Admin admin = adminUsers.get(user);
         Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (admin == null || !admin.isLoggedIn() || course == null)
@@ -219,6 +227,8 @@ public class Database {
      * @print the information of the student 'name'
      */
     public String studentStat(String user, String name) {
+        if (user == null)
+            return null;
         Admin admin = adminUsers.get(user);
         Student student = studentUsers.get(name);
         if (admin == null || !admin.isLoggedIn() || student == null)
@@ -233,6 +243,8 @@ public class Database {
      * @return "REGISTERED" if the student 'name' is registered to course 'num' or "UNREGISTERED" otherwise
      */
     public String isRegistered(String name, int num) {
+        if (name == null)
+            return null;
         Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (course == null)
             return null;
@@ -249,6 +261,8 @@ public class Database {
      * @return true if unregistered successfully, false otherwise
      */
     public boolean unregister(String name, int num) {
+        if (name == null)
+            return false;
         Student student = studentUsers.get(name);
         Course course = courses[courseSerials.getOrDefault(num, 0)];
         if (course == null || student == null || !student.isLoggedIn())
@@ -266,6 +280,8 @@ public class Database {
      * @return a list representing the courses that student 'name' is registered to
      */
     public String myCourses(String name) {
+        if (name == null)
+            return null;
         Student student = studentUsers.get(name);
         if (student == null || !student.isLoggedIn())
             return null;

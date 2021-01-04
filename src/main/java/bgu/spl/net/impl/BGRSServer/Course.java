@@ -63,7 +63,7 @@ public class Course implements Comparable<Course> {
      * @param name the name of the student who wants to register to the course
      * @return true if registration successful, false otherwise
      */
-    public boolean addStudent(String name) {
+    public synchronized boolean addStudent(String name) {
         //if there's no available seat return false
         if (registeredStudents.size() == maxSeats)
             return false;
@@ -77,7 +77,7 @@ public class Course implements Comparable<Course> {
      * @param name the name of the student who wants to unregister from the course
      * @return true if unregistered successfully, false otherwise
      */
-    public boolean removeStudent(String name) {
+    public synchronized boolean removeStudent(String name) {
         if (!registeredStudents.remove(name))
             return false;
         seatsTaken.decrementAndGet();
