@@ -1,17 +1,22 @@
 package bgu.spl.net.impl.BGRSServer.Tester;
 
-import java.util.Scanner;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class TestsMain {
-
-    public static void main(String [] args)
-    {
-        int numOfClients = 25;
-        ClientHandler cHandler = new ClientHandler("localhost",7777,numOfClients);
-        cHandler.initiateClients();
-
-        Scanner in = new Scanner(System.in);
-        System.out.println("MultiThreaded Tester....Have Fun\r\n");
-        new Thread(new GeneralTests(cHandler,numOfClients)).start();
+    public static void main(String[] args) {
+        int numberOfThreads = 10;
+        List<Thread> threads = new LinkedList<>();
+        for (int i = 0;i<numberOfThreads;i++){
+            TcpClient client = new TcpClient("localhost",7777);
+            Thread th = new Thread(client);
+            threads.add(th);
+            th.start();
+        }
+        try {
+            for (Thread th : threads)
+                th.join();
+        }catch (InterruptedException ignored){}
     }
 }
