@@ -29,7 +29,7 @@ class DatabaseTest {
         database.login("admin1", "123");
         assertEquals(database.courseStat("admin1", 2), "\n" +
                 "Course: (2) two" + "\n" +
-                "Seats Available: 3/3" + "\n" +
+                "Seats Available: 6/6" + "\n" +
                 "Students Registered: []");
     }
 
@@ -99,7 +99,7 @@ class DatabaseTest {
         database.login("admin1", "123");
         database.login("admin1", "123");
 
-        assertNull(database.studentStat("admin1", "student1"));
+        assertEquals(database.studentStat("admin1", "student1"),"");
         database.registerStudent("student1", "123");
         database.login("student1", "123");
         database.registerCourse("student1", 1);
@@ -108,7 +108,7 @@ class DatabaseTest {
 
     @Test
     void isRegistered() {
-        assertEquals(database.isRegistered("student1", 1), "\n" + "NOT REGISTERED");
+        assertEquals(database.isRegistered("student1", 1), "");
         database.registerStudent("student1", "123");
         database.login("student1", "123");
         database.registerCourse("student1", 1);
@@ -127,7 +127,7 @@ class DatabaseTest {
 
     @Test
     void myCourses() {
-        assertNull(database.myCourses("student1"));
+        assertEquals(database.myCourses("student1"),"");
         database.registerStudent("student1", "123");
         database.login("student1", "123");
         database.registerCourse("student1", 1);

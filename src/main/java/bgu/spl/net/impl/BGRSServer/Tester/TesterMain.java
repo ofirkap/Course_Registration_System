@@ -4,9 +4,10 @@ package bgu.spl.net.impl.BGRSServer.Tester;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TestsMain {
+public class TesterMain {
     public static void main(String[] args) {
-        int numberOfThreads = 4;
+        //pick as many threads as you like
+        int numberOfThreads = 1;
         List<Thread> threads = new LinkedList<>();
         for (int i = 0;i<numberOfThreads;i++){
             TesterClient client = new TesterClient("localhost",7777);

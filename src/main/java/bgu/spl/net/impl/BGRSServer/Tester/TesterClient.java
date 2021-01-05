@@ -1,6 +1,5 @@
 package bgu.spl.net.impl.BGRSServer.Tester;
 
-import bgu.spl.net.impl.BGRSServer.Message;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,6 +9,59 @@ import java.util.Random;
 import java.util.UUID;
 
 public class TesterClient implements Runnable {
+
+    /**
+     * Passive object representing the message sent from the testerClient to the server
+     */
+
+    private static class testerMessage {
+        private final short OPCode;
+        private short courseNum = 0;
+        private String name = null;
+        private String pass;
+        private short returnOPCode = 0;
+        private String returnInfo = "";
+
+        public testerMessage(short OPCode, short courseNum, String name, String pass) {
+            this.OPCode = OPCode;
+            this.courseNum = courseNum;
+            this.name = name;
+            this.pass = pass;
+        }
+
+        public testerMessage(short OPCode, short returnOPCode) {
+            this.OPCode = OPCode;
+            this.returnOPCode = returnOPCode;
+        }
+
+        public short getOPCode() {
+            return OPCode;
+        }
+
+        public int getCourseNum() {
+            return courseNum;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getPass() {
+            return pass;
+        }
+
+        public short getReturnOPCode() {
+            return returnOPCode;
+        }
+
+        public String getReturnInfo() {
+            return returnInfo;
+        }
+
+        public void setReturnInfo(String returnInfo) {
+            this.returnInfo = returnInfo;
+        }
+    }
 
     DataInputStream socketReader;
     DataOutputStream socketWriter;
@@ -24,7 +76,7 @@ public class TesterClient implements Runnable {
         }
     }
 
-    private void write(Message toSend) {
+    private void write(testerMessage toSend) {
         try {
             System.out.println(Thread.currentThread().getName() + " -> trying to " + toSend.getOPCode() + " " + toSend.getName() + " " + ((toSend.getCourseNum() != 0) ? toSend.getCourseNum() : ""));
             byte[] actualBytesToSend = encode(toSend);
@@ -35,7 +87,7 @@ public class TesterClient implements Runnable {
         }
     }
 
-    private byte[] encode(Message message) {
+    private byte[] encode(testerMessage message) {
         byte[] ans = new byte[1 << 10];
         int index = 2;
         shortToBytes(message.getOPCode(), ans, 0);
@@ -72,17 +124,18 @@ public class TesterClient implements Runnable {
             byte[] received = new byte[4];
             for (int i = 0; i < 4; i++)
                 received[i] = socketReader.readByte();
-            Message answer = new Message(bytesToShort(received, 0));
-            answer.setReturnOPCode(bytesToShort(received, 2));
-            if (answer.getOPCode() == 12) {
+            testerMessage answer = new testerMessage(bytesToShort(received, 0), bytesToShort(received, 2));
+            if (answer.getOPCode() == 12
+                    //Add this line if you aren't receiving a \0 byte at the end of every ACK message
+                    /*&& (answer.getReturnOPCode() == 6 || answer.getReturnOPCode() == 7 || answer.getReturnOPCode() == 8 || answer.getReturnOPCode() == 9 || answer.getReturnOPCode() == 11)*/) {
                 received = new byte[1 << 10];
                 int i = 0;
                 do
                     received[i] = socketReader.readByte();
-                while (received[i] != (byte) 0);
+                while (received[i++] != (byte) 0);
                 answer.setReturnInfo(new String(received, 0, i, StandardCharsets.UTF_8));
-            }
-            System.out.println(Thread.currentThread().getName() + " -> " + ((answer.getOPCode() == 12) ? "ACK " : "ERR ") + answer.getReturnOPCode() + answer.getReturnInfo());
+            } else answer.setReturnInfo("");
+            System.out.println(Thread.currentThread().getName() + " -> " + ((answer.getOPCode() == 12) ? "ACK " : "ERR ") + answer.getReturnOPCode() + " " + answer.getReturnInfo());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -99,30 +152,36 @@ public class TesterClient implements Runnable {
         arr[index + 1] = (byte) (num & 0xFF);
     }
 
+    /**
+     * each thread will preform all the following tasks and then exit.
+     * you can add other tasks, the code supports all the different message types
+     */
+
     @Override
     public void run() {
         String generatedUsername = UUID.randomUUID().toString().substring(0, 4);
         //register
-        Message toSend = new Message((short) 2);
-        toSend.setName(generatedUsername);
-        toSend.setPass(generatedUsername);
+        testerMessage toSend = new testerMessage((short) 2, (short) 0, generatedUsername, generatedUsername);
         write(toSend);
         read();
         //login
-        toSend = new Message((short) 3);
-        toSend.setName(generatedUsername);
-        toSend.setPass(generatedUsername);
+        toSend = new testerMessage((short) 3, (short) 0, generatedUsername, generatedUsername);
         write(toSend);
         read();
         //course register
-        toSend = new Message((short) 5);
-        toSend.setName(generatedUsername);
-        toSend.setCourseNum((short) (new Random().nextInt(4) + 1));
+        toSend = new testerMessage((short) 5, (short) (new Random().nextInt(4) + 1), generatedUsername, generatedUsername);
+        write(toSend);
+        read();
+        //course register
+        toSend = new testerMessage((short) 5, (short) (new Random().nextInt(4) + 1), generatedUsername, generatedUsername);
+        write(toSend);
+        read();
+        //my courses
+        toSend = new testerMessage((short) 11, (short) 0, generatedUsername, generatedUsername);
         write(toSend);
         read();
         //logout
-        toSend = new Message((short) 4);
-        toSend.setName(generatedUsername);
+        toSend = new testerMessage((short) 4, (short) 0, generatedUsername, generatedUsername);
         write(toSend);
         read();
     }
