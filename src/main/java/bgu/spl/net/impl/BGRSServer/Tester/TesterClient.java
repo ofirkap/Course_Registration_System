@@ -6,14 +6,15 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.UUID;
 
-public class TcpClient implements Runnable {
+public class TesterClient implements Runnable {
 
     DataInputStream socketReader;
     DataOutputStream socketWriter;
 
-    public TcpClient(String ip, int port) {
+    public TesterClient(String ip, int port) {
         try {
             Socket socket = new Socket(ip, port);
             this.socketReader = new DataInputStream(socket.getInputStream());
@@ -25,6 +26,7 @@ public class TcpClient implements Runnable {
 
     private void write(Message toSend) {
         try {
+            System.out.println(Thread.currentThread().getName() + " -> trying to " + toSend.getOPCode() + " " + toSend.getName() + " " + ((toSend.getCourseNum() != 0) ? toSend.getCourseNum() : ""));
             byte[] actualBytesToSend = encode(toSend);
             socketWriter.write(actualBytesToSend, 0, actualBytesToSend.length);
             socketWriter.flush();
@@ -114,11 +116,13 @@ public class TcpClient implements Runnable {
         read();
         //course register
         toSend = new Message((short) 5);
-        toSend.setCourseNum((short) 1);
+        toSend.setName(generatedUsername);
+        toSend.setCourseNum((short) (new Random().nextInt(4) + 1));
         write(toSend);
         read();
         //logout
         toSend = new Message((short) 4);
+        toSend.setName(generatedUsername);
         write(toSend);
         read();
     }

@@ -6,10 +6,10 @@ import java.util.List;
 
 public class TestsMain {
     public static void main(String[] args) {
-        int numberOfThreads = 10;
+        int numberOfThreads = 4;
         List<Thread> threads = new LinkedList<>();
         for (int i = 0;i<numberOfThreads;i++){
-            TcpClient client = new TcpClient("localhost",7777);
+            TesterClient client = new TesterClient("localhost",7777);
             Thread th = new Thread(client);
             threads.add(th);
             th.start();
