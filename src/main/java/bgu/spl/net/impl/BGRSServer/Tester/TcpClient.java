@@ -1,40 +1,87 @@
-/*
 package bgu.spl.net.impl.BGRSServer.Tester;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import bgu.spl.net.impl.BGRSServer.BGRSMessageEncoderDecoder;
+import bgu.spl.net.impl.BGRSServer.Message;
+
+import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
-public class TcpClient {
+public class TcpClient implements Runnable {
 
-    private static void run(String serverName, int port, String line) {
-        //try with resources: automatically close the defined resources when complete or on failure
-        try(Socket socket = new Socket(serverName, port);
-            BufferedReader userIn = new BufferedReader(line);
-            BufferedWriter out    = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            // the next line is not used since we do not listen to the server's replies.
-            BufferedReader in     = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+    private final Socket socket;
 
-            while ((line = userIn.readLine()) != null) {
-                out.write(line);
-                out.newLine(); // make sure to add the end of line as br.readLine strips it
-                out.flush();
-            }
-            System.out.println(in);
+    public TcpClient(Socket socket) {
+        this.socket = socket;
+    }
+
+    private void write(BGRSMessageEncoderDecoder encdec, Message toSend) {
+        try (DataOutputStream socketWriter = new DataOutputStream(socket.getOutputStream())) {
+            byte[] actualBytesToSend = encdec.encode(toSend);
+            socketWriter.write(actualBytesToSend, 0, actualBytesToSend.length);
+            socketWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) {
-        if (args.length != 2) {
-            System.out.println("Usage: java TcpClient host port");
-            return;
+    private void read() {
+        try (DataInputStream socketReader = new DataInputStream(socket.getInputStream())) {
+            byte[] received = new byte[4];
+            for (int i = 0; i < 4; i++)
+                received[i] = socketReader.readByte();
+            Message answer = new Message(bytesToShort(received, 0));
+            answer.setReturnOPCode(bytesToShort(received, 2));
+            if (answer.getOPCode() == 12) {
+                received = new byte[1 << 10];
+                int i = 0;
+                do
+                    received[i] = socketReader.readByte();
+                while (received[i] != (byte) 0);
+                answer.setReturnInfo(new String(received, 0, i, StandardCharsets.UTF_8));
+            }
+            System.out.println(Thread.currentThread().getName() + " -> " + answer.getOPCode() + " " + answer.getReturnOPCode() + answer.getReturnInfo());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        int numOfThreads = 10;
-        run(args[0], Integer.parseInt(args[1]));
     }
-}*/
+
+    private static short bytesToShort(byte[] arr, int index) {
+        short result = (short) ((arr[index] & 0xff) << 8);
+        result += (short) (arr[index + 1] & 0xff);
+        return result;
+    }
+
+    @Override
+    public void run() {
+        String generatedUsername = UUID.randomUUID().toString().substring(0, 4);
+        BGRSMessageEncoderDecoder encdec = new BGRSMessageEncoderDecoder();
+        //register
+        Message toSend = new Message((short) 2);
+        toSend.setName(generatedUsername);
+        toSend.setPass(generatedUsername);
+        write(encdec,toSend);
+        read();
+        //login
+        toSend = new Message((short) 3);
+        toSend.setName(generatedUsername);
+        toSend.setPass(generatedUsername);
+        write(encdec,toSend);
+        read();
+        //course register
+        toSend = new Message((short) 5);
+        toSend.setCourseNum((short) 1);
+        write(encdec,toSend);
+        read();
+        //logout
+        toSend = new Message((short) 4);
+        write(encdec,toSend);
+        read();
+        try {
+            Thread.currentThread().join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
