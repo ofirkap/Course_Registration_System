@@ -1,7 +1,7 @@
 package bgu.spl.net.impl.BGRSServer;
 
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -11,8 +11,6 @@ public class Student {
     private final String psw;
     private boolean loggedIn = false;
     private final SortedSet<Course> courses;
-
-    private final Object lock = new Object();
 
     public Student(String name, String psw) {
         this.name = name;
@@ -29,7 +27,7 @@ public class Student {
     }
 
     public List<Integer> getCourses() {
-        List<Integer> ans = new LinkedList<>();
+        List<Integer> ans = new ArrayList<>();
         for (Course course : courses)
             ans.add(course.getNum());
         return ans;

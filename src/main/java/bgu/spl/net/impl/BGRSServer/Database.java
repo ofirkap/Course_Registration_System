@@ -118,11 +118,19 @@ public class Database {
             Student tempS = studentUsers.get(name);
             if (tempS == null || !pass.equals(tempS.getPsw()) || tempS.isLoggedIn())
                 return false;
-            tempS.logInOrOut();
+            synchronized (tempS) {
+                if (tempS.isLoggedIn())
+                    return false;
+                else tempS.logInOrOut();
+            }
         } else {
             if (!pass.equals(tempA.getPsw()) || tempA.isLoggedIn())
                 return false;
-            tempA.logInOrOut();
+            synchronized (tempA) {
+                if (tempA.isLoggedIn())
+                    return false;
+                else tempA.logInOrOut();
+            }
         }
         return true;
     }
@@ -142,11 +150,19 @@ public class Database {
             Student tempS = studentUsers.get(name);
             if (tempS == null || !tempS.isLoggedIn())
                 return false;
-            tempS.logInOrOut();
+            synchronized (tempS) {
+                if (tempS.isLoggedIn())
+                    tempS.logInOrOut();
+                else return false;
+            }
         } else {
             if (!tempA.isLoggedIn())
                 return false;
-            tempA.logInOrOut();
+            synchronized (tempA) {
+                if (tempA.isLoggedIn())
+                    tempA.logInOrOut();
+                else return false;
+            }
         }
         return true;
     }
@@ -219,7 +235,7 @@ public class Database {
             return "";
         return ("\n" + "Course: " + "(" + num + ") " + course.getName() +
                 "\n" + "Seats Available: " + (course.getMaxSeats() - course.getSeatsTaken().intValue()) + "/" + course.getMaxSeats() +
-                "\n" + "Students Registered: " + course.getRegisteredStudents());
+                "\n" + "Students Registered: " + course.getRegisteredStudents().toString().replaceAll(" ", ""));
     }
 
     /**
@@ -234,7 +250,7 @@ public class Database {
         if (admin == null || !admin.isLoggedIn() || student == null)
             return "";
         return ("\n" + "Student: " + student.getName() +
-                "\n" + "Courses: " + student.getCourses());
+                "\n" + "Courses: " + student.getCourses().toString().replaceAll(" ", ""));
     }
 
     /**
@@ -285,7 +301,7 @@ public class Database {
         Student student = studentUsers.get(name);
         if (student == null || !student.isLoggedIn())
             return "";
-        return "\n" + student.getCourses();
+        return "\n" + student.getCourses().toString().replaceAll(" ", "");
     }
 
     public void clear() {

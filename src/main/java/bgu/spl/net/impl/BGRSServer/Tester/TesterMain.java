@@ -7,7 +7,7 @@ import java.util.List;
 public class TesterMain {
     public static void main(String[] args) {
         //pick as many threads as you like
-        int numberOfThreads = 1;
+        int numberOfThreads = 10;
         List<Thread> threads = new LinkedList<>();
         for (int i = 0;i<numberOfThreads;i++){
             TesterClient client = new TesterClient("localhost",7777);
