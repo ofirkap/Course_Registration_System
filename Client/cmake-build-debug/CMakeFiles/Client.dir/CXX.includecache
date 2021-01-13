@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/spl211/CLionProjects/Client/include/ConnectionHandler.h
+string
+-
+iostream
+-
+boost/asio.hpp
+-
+boost/algorithm/string.hpp
+-
+
+/home/spl211/CLionProjects/Client/include/Writer.h
+map
+-
+iostream
+-
+cassert
+-
+string
+-
+vector
+-
+cstdlib
+-
+../include/ConnectionHandler.h
+/home/spl211/CLionProjects/Client/include/ConnectionHandler.h
+
+/home/spl211/CLionProjects/Client/src/Writer.cpp
+../include/Writer.h
+/home/spl211/CLionProjects/Client/include/Writer.h
+string
+-
+

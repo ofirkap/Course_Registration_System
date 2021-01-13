@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/Client.dir/src/BGRSClient.cpp.o CMakeFiles/Client.dir/src/ConnectionHandler.cpp.o CMakeFiles/Client.dir/src/Reader.cpp.o CMakeFiles/Client.dir/src/Writer.cpp.o  -o Client  -lboost_system -pthread 
